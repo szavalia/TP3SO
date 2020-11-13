@@ -304,7 +304,7 @@ void desafio11(int socket,FILE * stream){
 void desafio12(int socket, FILE * stream){ //GDB me
     int rta; 
     char buff[1024]={0};
-    while(strcmp(buff, "gdb_rules") != 0){ 
+    while(strcmp(buff, "gdb_rules\n") != 0){ 
         system("clear");
         puts(desafio);
         puts("b gdbme y buscá la palabra mágica");
@@ -330,32 +330,9 @@ void desafio13(int socket, FILE * stream){
     
     double mean = drand() * 10; //la media está entre 0 y 10
     double stddev = drand(); //la desviación estándar está entre 0 y 1
-    char respuesta[1024]={0};
-            
-    system("clear");
-    puts(desafio);
-    printf("Ya me conoces\n");
-
-    puts("\n");
-    puts(pregunta);
-    puts("¿Fue divertido?");
-    puts("\n");
-
-    if(fgets(respuesta, 1024, stream) == NULL){
-           exit(1); 
-    }
-  
-    while(strcmp(respuesta, "normal\n") != 0){
-         
-        for(int i=0; i<1000; i++){
-            printf("%g ", random_normal());
-        }
-
-        if(fgets(respuesta, 1024, stream) == NULL){
-           exit(1); 
-        }
-
-        printf("Respuesta incorrecta: %s", respuesta);
+    char respuesta[1024]={0};   
+    int aux;
+    do{
         system("clear");
         puts(desafio);
         printf("Ya me conoces\n");
@@ -363,8 +340,24 @@ void desafio13(int socket, FILE * stream){
         puts("\n");
         puts(pregunta);
         puts("¿Fue divertido?");
-        puts("\n");    
-    }
+        puts("\n");  
+
+        for(int i=0; i<800; i++){
+            printf("%g ", random_normal());
+        }
+        putchar('\n');
+        
+        if(fgets(respuesta, 1024, stream) == NULL){
+           exit(1); 
+        }     
+        aux = strcmp(respuesta, "normal\n");
+        if ( aux != 0 ){
+            printf("Respuesta incorrecta: %s", respuesta);
+        }else{
+            printf("Respuesta correcta: %s\nTerminaste!! :)\n", respuesta);
+        }
+          
+    }while( aux != 0);
 }
 
 //código obtenido de https://stackoverflow.com/questions/7034930/how-to-generate-gaussian-pseudo-random-numbers-in-c-for-a-given-mean-and-varianc
