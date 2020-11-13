@@ -38,7 +38,7 @@ int main(int argc, char const *argv[])
         return -1; 
     } 
 
-    send(sock , "entendido\n" , strlen("entendido\n"), 0 );
+    /*send(sock , "entendido\n" , strlen("entendido\n"), 0 );
     send(sock, "itba\n", strlen("itba\n"), 0);
     send(sock, "M4GFKZ289aku\n", strlen("M4GFKZ289aku\n"), 0);
     send(sock, "fk3wfLCm3QvS\n", strlen("fk3wfLCm3QvS\n"), 0);
@@ -49,7 +49,7 @@ int main(int argc, char const *argv[])
     send(sock, "u^v\n", strlen("u^v\n"), 0); 
     send(sock, "chin_chu_lan_cha\n", strlen("chin_chu_lan_cha\n"), 0);
     send(sock, "gdb_rules\n", strlen("gdb_rules\n"), 0);
-    send(sock, "normal\n", strlen("normal\n"), 0);
+    send(sock, "normal\n", strlen("normal\n"), 0);*/
 
 
     while(1){

@@ -1,3 +1,0 @@
-write: Bad file descriptor
-ILlcx,/FM+'`wayv wE>dTo@_eF?^k`oPJl#J"OrfIC4p,O]LsP ''gz-D?@T{&l9"ks14c(GfK3(<-csP+%Q`#%Y/w5_J?QE$&mKXT6/D`R2{ D7%}Jwc]67?m9hKztgD:}kZ%gC;x8e(1?f}V;-P("8YSBj*a ]getline: Invalid argument
-t

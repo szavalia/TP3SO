@@ -1,4 +1,3 @@
-// Server side C/C++ program to demonstrate Socket programming 
 //inspirado en el archivo de geeksforgeeks 
 #include <unistd.h> 
 #include <stdio.h> 
@@ -9,6 +8,8 @@
 #include <errno.h>
 #include <math.h>
 #define PORT 8080 
+#define READ 0
+#define WRITE 1
 
 extern int run();
 extern int gdbme();
@@ -128,6 +129,7 @@ int kill_debugger(){
 
 void desafio1(int socket, char * text, char * enunciado){
     system("clear");
+    puts(desafio);
     printf("%s", enunciado);
     char buffer[1024] = {0};
     int valread = read(socket, buffer, 1024);
@@ -143,7 +145,8 @@ void desafio1(int socket, char * text, char * enunciado){
 
 void desafio5(int socket, char * rta, char * enunciado){
     system("clear");
-    printf("%s", enunciado);
+    puts(desafio);
+    puts(enunciado);
     char respuesta[60] = "La respuesta es:";
     strcat(respuesta, rta);
     char buffer[1024] = {0};
@@ -192,6 +195,7 @@ void desafio8 (int socket){
 
 void desafio9(int socket){
     system("clear");
+    puts(desafio);
     printf("¿?");
     printf("\x1b[8m" "respuestilla" "\x1b[0m" "\n");
     char buffer[1024] = {0};
@@ -208,7 +212,7 @@ void desafio9(int socket){
     
 void desafio7(int socket){
     system("clear");
-    printf("%s", desafio);
+    puts(desafio);
     printf(".data .text ? .bss .ss \n");
     char buffer[1024] = {0};
     int valread = read(socket, buffer, 1024);
@@ -233,13 +237,46 @@ void read_line(int fd , char * buffer , int max){
         }
     }
 }
-void desafio11(int socket){
+int desafio11_iteration(int socket){
+    char buffer1[4*1024];
+    char buffer2[4*1024];
+    char * argv[] = {NULL};
     FILE * stream = fopen("./quine.c" , "r+");
     if ( stream != 0 ){
         system("gcc quine.c -o quine");
     }
+    else{
+        puts("No se encontró el archivo");
+        return -1;
+    }
+    int fd[2];
+    int ret;
+    pipe(fd);
     //TODO: Ver que onda este while
-    
+    //Segun jerusa puede llegar a entrar a en un bloque
+    if ( fork() == 0 ){
+        close(fd[READ]);
+        dup2( 1 , fd[WRITE]);
+        execv("./quine" , argv);
+    }
+    close(fd[WRITE]);
+    fread( buffer1 , 4*1024  , sizeof(char) , stream );
+    read( fd[READ] ,  buffer2 , 4*1024 );
+    ret = strcmp( buffer1 , buffer2 );
+    close(fd[READ]);
+    return ret;
+}
+void desafio11(int socket){
+    int ret;
+    FILE * stream = fdopen(socket, "r+");
+    char buffer[1024];
+    do{
+        system("clear");
+        puts(desafio);
+        printf("Presiona ENTER para reintentar\n");
+        ret = desafio11_iteration(socket);
+        fgets(buffer, 1024, stream);
+    } while ( ret != 0);    
 }
 
 void desafio12(int socket){ //GDB me
@@ -249,17 +286,15 @@ void desafio12(int socket){ //GDB me
     puts(pregunta);
     puts("¿Que es un RFC?");
     FILE * stream;
-    int rta = gdbme(), valread; 
+    int rta = gdbme(); 
     char buff[1024];
     if(rta != 1){ //no hizo la tarea
         puts("Muy mal! Pésimo!");
         sleep(1);
         fdopen(socket, "r+");
-        valread = strlen(fgets(buff, 1024, stream));
+        fgets(buff, 1024, stream);
         fclose(stream);
-        if(valread != 0){ //si ingresó algo
-            desafio11(socket);
-        }
+        desafio11(socket);
     }        
 }
 
@@ -282,7 +317,7 @@ void desafio13(int socket){
     puts("\n");
     
     FILE * stream = fdopen(socket, "r+");;
-    int valread = strlen(fgets(respuesta, 1024, stream));
+    fgets(respuesta, 1024, stream);
     fclose(stream);
 
     if(strcmp(respuesta, "normal\n") != 0){
