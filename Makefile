@@ -1,11 +1,11 @@
 all: server
-	gcc socktest.c -o socktest
+	gcc client.c -o client
 
 clean:
-	rm *.o socktest ourServer
+	rm *.o client our_server
 
 server: asm
-	gcc ourServer.c runme.o -o ourServer -lm
+	gcc our_server.c runme.o -o our_server -lm
 
 asm:
 	nasm -f elf64 runme.asm

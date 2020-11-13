@@ -53,7 +53,9 @@ int main(int argc, char const *argv[])
 
 
     while(1){
-        scanf("%s", message);
+        if(scanf("%s", message) <= 0){
+            break;
+        }
         printf("Message: %s\n", message);
         send(sock , strcat(message, "\n") , strlen(message)+1 , 0 ); 
     }
