@@ -14,12 +14,14 @@
 extern int run();
 extern int gdbme();
 
-void desafio1(int socket, char * text, char * enunciado);
-void desafio5(int socket, char * rta, char * enunciado);
-void desafio8(int socket);
-void desafio9(int socket);
-void desafio12(int socket);
-void desafio13(int socket);
+void desafio1(int socket, char * text, char * enunciado, FILE * stream);
+void desafio5(int socket, char * rta, char * enunciado, FILE * stream);
+void desafio7(int socket, FILE * stream);
+void desafio8(int socket, FILE * stream);
+void desafio9(int socket, FILE * stream);
+void desafio11(int socket, FILE * stream);
+void desafio12(int socket, FILE * stream);
+void desafio13(int socket, FILE * stream);
 
 double drand();
 double random_normal();
@@ -27,6 +29,14 @@ double random_normal();
 char desafio[] = "------------- DESAFIO -------------";
 char pregunta[] = "----- PREGUNTA PARA INVESTIGAR -----";
 
+int kill_debugger(){
+    int pid = getpid();
+    if ( fork() == 0 ){
+        char command[250];
+        sprintf(command , "pid=$(grep Tracer /proc/%d/status | cut -f 2) && kill \"$pid\"" , pid );
+        execl("/bin/sh", "sh","-c",  command, (char*) 0);
+    }
+}
 
 int main(int argc, const char *argv[]){ 
     int server_fd, new_socket, valread; 
@@ -34,7 +44,6 @@ int main(int argc, const char *argv[]){
     int opt = 1; 
     int addrlen = sizeof(address); 
     char buffer[1024] = {0}; 
-    char hello[] = "Hello from server"; 
 
     //-------------------------------------------------------------
     //                      Creacion del server
@@ -83,79 +92,83 @@ int main(int argc, const char *argv[]){
     
     //no decia tal cual esto pero ponele que era así 
     //desafio 2
-    desafio1(new_socket, "entendido\n","Bienvenidos al primer desafío, para continuar, enviar una señal que diga \"entendido\\n\"\n");
+
+    FILE * stream = fdopen(new_socket, "r+");
+
+    desafio1(new_socket, "entendido\n","Bienvenidos al primer desafío, para continuar, enviar una señal que diga \"entendido\\n\"\n", stream);
 
     //desafio 3
-    desafio1(new_socket, "itba\n", "The wire, S01E05: 5295 888 6288\n");
+    desafio1(new_socket, "itba\n", "The wire, S01E05: 5295 888 6288\n", stream);
 
     //desafio 4
-    desafio1(new_socket,"M4GFKZ289aku\n","https://ibb.co/tc0Hb6w \n");
+    desafio1(new_socket,"M4GFKZ289aku\n","https://ibb.co/tc0Hb6w \n", stream);
 
     //desafio 5
-    desafio5(new_socket, "fk3wfLCm3QvS\n", "EBADF ...");
+    desafio5(new_socket, "fk3wfLCm3QvS\n", "EBADF ...", stream);
 
     //desafio 6 --> no esta terminado! hay que ver como guardar el string
-    desafio5(new_socket, "fk3wfLCm3QvS\n", "Respuesta= strings:277");
+    desafio5(new_socket, "too_easy\n", "Respuesta= strings:277", stream);
 
     //Desafio 7 --> .RUN_ME
+    desafio7(new_socket, stream);
 
     //desafio 8 --> filter error
-    desafio8(new_socket);
+    desafio8(new_socket, stream);
 
     //desafio 9 - letras negras
-    desafio9(new_socket);
+    desafio9(new_socket, stream);
 
     //desafio 10
-    desafio1(new_socket, "u^v\n", "Latexme:\n dy=:u^v\\cdot \\left(v'\\cdot \\ln \\left(u\right)+v\\cdot \frac{u'}{u}\right)\n");
+    desafio1(new_socket, "u^v\n", "Latexme:\n dy=:u^v\\cdot \\left(v'\\cdot \\ln \\left(u\\right)+v\\cdot \\frac{u'}{u}\\right)\n", stream);
 
-    send(new_socket , hello , strlen(hello) , 0 ); 
-    printf("Hello message sent\n");
+    //desafio 11
+    desafio11(new_socket, stream);
 
-    //desafío 11 --> GDB
-    desafio12(new_socket);
+    //desafío 12 --> GDB
+    desafio12(new_socket, stream);
 
-    //desafío 12 --> Distribución normal
-    desafio13(new_socket);
+    //desafío 13 --> Distribución normal
+    desafio13(new_socket, stream);
+
+    fclose(stream);
 } 
 
-int kill_debugger(){
-    int pid = getpid();
-    if ( fork() == 0 ){
-        char command[250];
-        sprintf(command , "grep Tracer /proc/%d/status | cut -f 2" , pid );
-        execl("/bin/sh", "sh", "c" , command, (char*) 0);
-    }
-}
-
-void desafio1(int socket, char * text, char * enunciado){
+void desafio1(int socket, char * text, char * enunciado, FILE * stream){
     system("clear");
     puts(desafio);
     printf("%s", enunciado);
     char buffer[1024] = {0};
-    int valread = read(socket, buffer, 1024);
+
+    fgets(buffer, 1024, stream);
     while(strcmp(buffer, text) != 0){
         printf("Mensaje incorrecto: %s", buffer);
-        valread = read(socket, buffer, 1024);
+        if(fgets(buffer, 1024, stream) == NULL){
+           exit(1); 
+        }
         sleep(1);
         system("clear");
+        puts(desafio);
         printf("%s", enunciado);
     }
     return;
 }
 
-void desafio5(int socket, char * rta, char * enunciado){
+void desafio5(int socket, char * rta, char * enunciado, FILE * stream){ 
     system("clear");
     puts(desafio);
     puts(enunciado);
     char respuesta[60] = "La respuesta es:";
     strcat(respuesta, rta);
     char buffer[1024] = {0};
-    int valread = read(socket, buffer, 1024);
+    fgets(buffer, 1024, stream);
     while(strcmp(buffer, rta) != 0){
         printf("Mensaje incorrecto: %s", buffer);
-        valread = read(socket, buffer, 1024);
+        if(fgets(buffer, 1024, stream) == NULL){
+           exit(1); 
+        }
         sleep(1);
         system("clear");
+        puts(desafio);
         printf("%s", enunciado);
     }
     return;
@@ -171,21 +184,24 @@ void gen_random(char *s, const int len) {
     s[len] = 0;
 }
 
-void desafio8 (int socket){
+void desafio8 (int socket, FILE * stream){
     system("clear");
     printf("Filter error\n");
-    write(1, "La respuesta es: 12345678", 26);
-    write(2 , "\rjfbglabgabrgkvbrlvbrajbvierqbgvjrbvirfbiubverivbierbvrbv\n", 59 );
+    write(1, "La respuesta es: K5n2UFfpFMUN\n", 26);
+    write(2 , "\rjfbglabgabrgkvbrlvbrajbvierqbgvjrbvirfbiubverivbierbvrbv\n", 59 ); //TODO: poner string random
     char buffer[1024] = {0};
     char random[82];
-    int valread = read(socket, buffer, 1024);
-    while(strcmp(buffer, "12345678\n") != 0){
+
+    fgets(buffer, 1024, stream);
+    while(strcmp(buffer, "K5n2UFfpFMUN\n") != 0){
         printf("Mensaje incorrecto: %s", buffer);
-        valread = read(socket, buffer, 1024);
+        if(fgets(buffer, 1024, stream) == NULL){
+           exit(1); 
+        }
         sleep(1);
         system("clear");
         printf("Filter error\n");
-        write(1, "La respuesta es: 12345678", 26);
+        write(1, "La respuesta es: K5n2UFfpFMUN", 26);
         gen_random(random, 82);
         random[0] = '\r';
         random[82] = '\n';
@@ -193,53 +209,48 @@ void desafio8 (int socket){
     }
 }
 
-void desafio9(int socket){
+void desafio9(int socket, FILE * stream){
     system("clear");
     puts(desafio);
     printf("¿?");
-    printf("\x1b[8m" "respuestilla" "\x1b[0m" "\n");
+    printf("\x1b[8m" "BUmyYq5XxXGt\n" "\x1b[0m" "\n");
     char buffer[1024] = {0};
-    int valread = read(socket, buffer, 1024);
-    while(strcmp(buffer, "fk3wfLCm3QvS\n") != 0){
+    fgets(buffer, 1024, stream);
+    while(strcmp(buffer, "BUmyYq5XxXGt\n") != 0){
         printf("Mensaje incorrecto: %s", buffer);
-        valread = read(socket, buffer, 1024);
+        if(fgets(buffer, 1024, stream) == NULL){
+           exit(1); 
+        }
         sleep(1);
         system("clear");
-        printf("respuestilla");
+        puts(desafio);
+        printf("¿?");
+        printf("\x1b[8m" "BUmyYq5XxXGt\n" "\x1b[0m" "\n");
     }
     return;
 }
     
-void desafio7(int socket){
+void desafio7(int socket, FILE * stream){
     system("clear");
     puts(desafio);
     printf(".data .text ? .bss .ss \n");
     char buffer[1024] = {0};
-    int valread = read(socket, buffer, 1024);
-    while(strcmp(buffer, ".run_me\n") != 0){
+
+    fgets(buffer, 1024, stream);
+    while(strcmp(buffer, ".RUN_ME\n") != 0){
         printf("Mensaje incorrecto: %s", buffer);
-        valread = read(socket, buffer, 1024);
+        if(fgets(buffer, 1024, stream) == NULL){
+           exit(1); 
+        }
         sleep(1);
         system("clear");
-        printf("respuestilla");
+        puts(desafio);
+        printf(".data .text ? .bss .ss \n");
     }
     return;    
 }
 
-void read_line(int fd , char * buffer , int max){
-    char c;
-    int i = 0;
-    while( read(fd , &c , 1) != 1 || i < max ){
-        buffer[i] = c;
-        i++;
-        if ( c == '\n'){
-            return;
-        }
-    }
-}
-int desafio11_iteration(int socket){
-    char buffer1[4*1024];
-    char buffer2[4*1024];
+int desafio11_iteration(int socket , char buffer1[] , char buffer2[]){
     char * argv[] = {NULL};
     FILE * stream = fopen("./quine.c" , "r+");
     if ( stream != 0 ){
@@ -253,7 +264,6 @@ int desafio11_iteration(int socket){
     int ret;
     pipe(fd);
     //TODO: Ver que onda este while
-    //Segun jerusa puede llegar a entrar a en un bloque
     if ( fork() == 0 ){
         close(fd[READ]);
         dup2( 1 , fd[WRITE]);
@@ -266,63 +276,86 @@ int desafio11_iteration(int socket){
     close(fd[READ]);
     return ret;
 }
-void desafio11(int socket){
+
+void desafio11(int socket,FILE * stream){
     int ret;
-    FILE * stream = fdopen(socket, "r+");
     char buffer[1024];
+    char buffer1[4*1024];
+    char buffer2[4*1024];
     do{
         system("clear");
         puts(desafio);
         printf("Presiona ENTER para reintentar\n");
-        ret = desafio11_iteration(socket);
-        fgets(buffer, 1024, stream);
+        ret = desafio11_iteration(socket, buffer1 , buffer2);
+        if(fgets(buffer, 1024, stream) == NULL){
+           exit(1); 
+        }
     } while ( ret != 0);    
 }
 
-void desafio12(int socket){ //GDB me
-    system("clear");
-    puts(desafio);
-    puts("b gdbme y buscá la palabra mágica");
-    puts(pregunta);
-    puts("¿Que es un RFC?");
-    FILE * stream;
-    int rta = gdbme(); 
-    char buff[1024];
-    if(rta != 1){ //no hizo la tarea
-        puts("Muy mal! Pésimo!");
-        sleep(1);
-        fdopen(socket, "r+");
-        fgets(buff, 1024, stream);
-        fclose(stream);
-        desafio11(socket);
-    }        
+void desafio12(int socket, FILE * stream){ //GDB me
+    int rta; 
+    char buff[1024]={0};
+    while(strcmp(buff, "gdb_rules") != 0){ 
+        system("clear");
+        puts(desafio);
+        puts("b gdbme y buscá la palabra mágica");
+        puts(pregunta);
+        puts("¿Que es un RFC?");
+         
+        rta = gdbme();
+        if(rta == 1){
+            puts("La respuesta es gdb_rules");        
+        }
+        else{
+            puts("Presione ENTER para reintentar");
+        }
+
+        if(fgets(buff, 1024, stream) == NULL){
+            exit(1); 
+        }
+    }
 }
 
 
-void desafio13(int socket){
+void desafio13(int socket, FILE * stream){
+    
+    double mean = drand() * 10; //la media está entre 0 y 10
+    double stddev = drand(); //la desviación estándar está entre 0 y 1
+    char respuesta[1024]={0};
+            
     system("clear");
     puts(desafio);
     printf("Ya me conoces\n");
-    double mean = drand() * 10; //la media está entre 0 y 10
-    double stddev = drand(); //la desviación estándar está entre 0 y 1
-    char respuesta[1024];
-
-    for(int i=0; i<1000; i++){
-        printf("%g ", random_normal());
-    }
 
     puts("\n");
     puts(pregunta);
     puts("¿Fue divertido?");
     puts("\n");
-    
-    FILE * stream = fdopen(socket, "r+");;
-    fgets(respuesta, 1024, stream);
-    fclose(stream);
 
-    if(strcmp(respuesta, "normal\n") != 0){
+    if(fgets(respuesta, 1024, stream) == NULL){
+           exit(1); 
+    }
+  
+    while(strcmp(respuesta, "normal\n") != 0){
+         
+        for(int i=0; i<1000; i++){
+            printf("%g ", random_normal());
+        }
+
+        if(fgets(respuesta, 1024, stream) == NULL){
+           exit(1); 
+        }
+
         printf("Respuesta incorrecta: %s", respuesta);
-        desafio12(socket);
+        system("clear");
+        puts(desafio);
+        printf("Ya me conoces\n");
+
+        puts("\n");
+        puts(pregunta);
+        puts("¿Fue divertido?");
+        puts("\n");    
     }
 }
 
