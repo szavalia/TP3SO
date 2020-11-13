@@ -1,7 +1,6 @@
 GLOBAL run
 GLOBAL gdbme
-
-.text
+section .text
 
 run:
     mov eax,50
@@ -33,6 +32,6 @@ success:
 
 
 
-.RUN_ME
+section .RUN_ME
 
 

@@ -23,8 +23,8 @@ void desafio13(int socket);
 double drand();
 double random_normal();
 
-char desafio[36] = "------------- DESAFIO -------------";
-char pregunta[37] = "----- PREGUNTA PARA INVESTIGAR -----";
+char desafio[] = "------------- DESAFIO -------------";
+char pregunta[] = "----- PREGUNTA PARA INVESTIGAR -----";
 
 
 int main(int argc, const char *argv[]){ 
@@ -208,7 +208,7 @@ void desafio9(int socket){
     
 void desafio7(int socket){
     system("clear");
-    printf(desafio);
+    printf("%s", desafio);
     printf(".data .text ? .bss .ss \n");
     char buffer[1024] = {0};
     int valread = read(socket, buffer, 1024);
@@ -234,28 +234,28 @@ void read_line(int fd , char * buffer , int max){
     }
 }
 void desafio11(int socket){
-
-    FILE * stream = fdopen("./quino.c" , "r+");
+    FILE * stream = fopen("./quine.c" , "r+");
     if ( stream != 0 ){
-        system("gcc quino.c -o quino");
-    }    
-
+        system("gcc quine.c -o quine");
+    }
+    //TODO: Ver que onda este while
     
 }
+
 void desafio12(int socket){ //GDB me
     system("clear");
     puts(desafio);
     puts("b gdbme y buscá la palabra mágica");
     puts(pregunta);
-    puts()
+    puts("¿Que es un RFC?");
     FILE * stream;
     int rta = gdbme(), valread; 
     char buff[1024];
     if(rta != 1){ //no hizo la tarea
         puts("Muy mal! Pésimo!");
         sleep(1);
-        fdopen(socket, "r");
-        valread = fgets(buff, 1024);
+        fdopen(socket, "r+");
+        valread = strlen(fgets(buff, 1024, stream));
         fclose(stream);
         if(valread != 0){ //si ingresó algo
             desafio11(socket);
@@ -281,8 +281,8 @@ void desafio13(int socket){
     puts("¿Fue divertido?");
     puts("\n");
     
-    FILE * stream = fdopen(socket, r+);;
-    int valread = fgets(respuesta, 1024, stream);
+    FILE * stream = fdopen(socket, "r+");;
+    int valread = strlen(fgets(respuesta, 1024, stream));
     fclose(stream);
 
     if(strcmp(respuesta, "normal\n") != 0){
