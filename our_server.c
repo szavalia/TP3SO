@@ -1,4 +1,3 @@
-//inspirado en el archivo de geeksforgeeks 
 #include <unistd.h> 
 #include <stdio.h> 
 #include <sys/socket.h> 
@@ -37,7 +36,7 @@ int kill_debugger(){
         execl("/bin/sh", "sh","-c",  command, (char*) 0);
     }
 }
-
+//Inspirado en: https://www.geeksforgeeks.org/socket-programming-cc/
 int create_server(){
     int server_fd, new_socket; 
     struct sockaddr_in address; 
@@ -167,7 +166,7 @@ void desafio5(int socket, char * rta, char * enunciado, FILE * stream){
     }
     return;
 }
-
+//Inspirado en: https://www.codeproject.com/Questions/640193/Random-string-in-language-C
 void gen_random(char *s, const int len) {
     static const char alphanum[] =     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz<çÇ-_.,´+``¨¨+``{}>!·$&/()=?¿çΧΨΩαβγδεζηθικλμνξοπρςστυφϒϖχψωא";
 
